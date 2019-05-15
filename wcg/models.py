@@ -71,9 +71,9 @@ class Request(models.Model):
         time = strftime("%H%M%S")
         extension = filename.split('.')[-1]
 
-        name = "{title}_{date}_{time}.{extension}".format(
-            title=self.title,
+        name = "{date}/{title}_{date}_{time}.{extension}".format(
             date=date,
+            title=self.title,
             time=time,
             extension=extension
         )
