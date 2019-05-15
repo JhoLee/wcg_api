@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from pytz import timezone
@@ -9,57 +8,61 @@ from django.db import models
 from django.conf import settings
 
 
-def user_path(instance, filename):
-    from random import choice
-    import string
+def default_mask_image_path():
+    name = "default_mask_image.jpeg"
 
-    arr = [choice(string.ascii_letters) for _ in range(8)]
-    pid = ''.join(arr)
-    extension = filename.split('.')[-1]
-
-    return 'mask_image/%s.%s' % (pid, extension)
+    return media_path('mask_image', name)
 
 
-def mask_path(instance, filename):
+def media_path(type, name):
     """
 
-    :param instance: instance.
-    :param filename: maks image's file name
-    :return: mask image's path to save in server.
-    """
-    # TODO: Check file's extension.
-
-    date = strftime("%y%m%d")
-    time = strftime("%H%M%S")
-    extension = filename.split('.')[-1]
-
-    path = "mask_image/%s_%s_%s_%s.%s" % (instance.title, instance.font, date, time, extension)
-
-    return path
-
-
-def font_path():
-    """
-
+    :param type:
+    :param name:
     :return:
     """
-    return os.path.join(STATIC_ROOT, '/font')
+    return "{type}/{name}".format(
+        type=type,
+        name=name
+    )
 
 
-class MaskImage(models.Model):
+class Font(models.Model):
     def __str__(self):
-        return self.title + "_" + datetime.strftime(self.uploaded_at_korean_time, "%y%m%d_%H%M%S")
+        return self.name
+
+    def font_path(self, filename):
+        """
+        Font file path setting
+        :param filename: original name of the font to upload
+        :return: path to upload to
+        """
+        name = self.name + "." + filename.split('.')[-1]
+        return media_path('font', name)
+
+    name = models.CharField(max_length=100)
+    font_file = models.FileField(upload_to=font_path)
+
+
+class Request(models.Model):
+    def __str__(self):
+        return "{requester}-{title}-{date}_{time}".format(
+            requester=self.requester,
+            title=self.title,
+            date=datetime.strftime(self.requested_at_korean_time, "%y%m%d"),
+            time=datetime.strftime(self.requested_at_korean_time, "%H%M%S")
+        )
 
     @property
-    def uploaded_at_korean_time(self):
+    def requested_at_korean_time(self):
         korean_timezone = timezone(settings.TIME_ZONE)
-        return self.uploaded_at.astimezone(korean_timezone)
+        return self.requested_at.astimezone(korean_timezone)
 
-    def mask_path(self, filename):
+    def mask_image_path(self, filename):
         """
 
         :param self: instance.
-        :param filename: maks image's file name
+        :param filename: mask image's file name
         :return: mask image's path to save in server.
         """
         # TODO: Check file's extension.
@@ -68,32 +71,25 @@ class MaskImage(models.Model):
         time = strftime("%H%M%S")
         extension = filename.split('.')[-1]
 
-        path = "mask_image/%s_%s_%s.%s" % (self.title, date, time, extension)
+        name = "{title}_{date}_{time}.{extension}".format(
+            title=self.title,
+            date=date,
+            time=time,
+            extension=extension
+        )
+        return media_path("mask_image", name)
 
-        return path
-
+    requester = models.CharField(max_length=200, default="unknown")
     title = models.CharField(max_length=100)
-    image = models.ImageField(upload_to=mask_path)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    data = models.TextField(default="")
+    font = models.ForeignKey(Font, models.SET_DEFAULT, default=None)
+    mask_image = models.ImageField(upload_to=mask_image_path, blank=True)
+    background_color = ColorField(default="#FFFFFF")
+    requested_at = models.DateTimeField(auto_now_add=True)
 
 
 class WordCloud(models.Model):
     def __str__(self):
-        return self.title + "_" + datetime.strftime(self.uploaded_at, "%y%m%d_%H%M%S")
+        return self.request.title + "_" + str(datetime.strftime(self.request.requested_at_korean_time, "%y%m%d_%H%M%S"))
 
-    @property
-    def uploaded_at_korean_time(self):
-        korean_timzeone = timezone(settings.TIME_ZONE)
-        return self.uploaded_at.astimezone(korean_timzeone)
-
-    title = models.CharField(max_length=100)
-    mask_image = models.ForeignKey(MaskImage, on_delete=models.CASCADE)
-    font = models.CharField(max_length=50)
-    data = models.TextField()
-    background_color = ColorField(default="#FFFFFF")
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-
-class Font(models.Model):
-    name = models.CharField(max_length=100)
-    path = models.FilePathField(path=font_path)
+    request = models.ForeignKey(Request, models.CASCADE)

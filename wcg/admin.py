@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import WordCloud, Font, MaskImage
+from .models import *
 
+admin.site.register(Request)
 admin.site.register(WordCloud)
-admin.site.register(MaskImage)
 admin.site.register(Font)
