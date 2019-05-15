@@ -46,23 +46,6 @@ def font_path():
     return os.path.join(STATIC_ROOT, '/font')
 
 
-class WordCloud(models.Model):
-    def __str__(self):
-        return self.title + "_" + datetime.strftime(self.uploaded_at, "%y%m%d_%H%M%S")
-
-    @property
-    def uploaded_at_korean_time(self):
-        korean_timzeone = timezone(settings.TIME_ZONE)
-        return self.uploaded_at.astimezone(korean_timzeone)
-
-    title = models.CharField(max_length=100)
-    mask_image = models.ImageField(upload_to=mask_path)
-    font = models.CharField(max_length=50)
-    data = models.TextField()
-    background_color = ColorField(default="#FFFFFF")
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-
 class MaskImage(models.Model):
     def __str__(self):
         return self.title + "_" + datetime.strftime(self.uploaded_at_korean_time, "%y%m%d_%H%M%S")
@@ -91,6 +74,23 @@ class MaskImage(models.Model):
 
     title = models.CharField(max_length=100)
     image = models.ImageField(upload_to=mask_path)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class WordCloud(models.Model):
+    def __str__(self):
+        return self.title + "_" + datetime.strftime(self.uploaded_at, "%y%m%d_%H%M%S")
+
+    @property
+    def uploaded_at_korean_time(self):
+        korean_timzeone = timezone(settings.TIME_ZONE)
+        return self.uploaded_at.astimezone(korean_timzeone)
+
+    title = models.CharField(max_length=100)
+    mask_image = models.ForeignKey(MaskImage, on_delete=models.CASCADE)
+    font = models.CharField(max_length=50)
+    data = models.TextField()
+    background_color = ColorField(default="#FFFFFF")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
