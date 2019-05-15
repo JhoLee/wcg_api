@@ -65,10 +65,9 @@ class Request(models.Model):
         :param filename: mask image's file name
         :return: mask image's path to save in server.
         """
-        # TODO: Check file's extension.
 
-        date = strftime("%y%m%d")
-        time = strftime("%H%M%S")
+        date = datetime.strftime(self.requested_at_korean_time, "%y%m%d")
+        time = datetime.strftime(self.requested_at_korean_time, "%H%M%S")
         extension = filename.split('.')[-1]
 
         name = "{date}/{title}_{date}_{time}.{extension}".format(
@@ -92,4 +91,18 @@ class WordCloud(models.Model):
     def __str__(self):
         return self.request.title + "_" + str(datetime.strftime(self.request.requested_at_korean_time, "%y%m%d_%H%M%S"))
 
+    def word_cloud_path(self, filename):
+        date = datetime.strftime(self.request.requested_at_korean_time, "%y%m%d")
+        time = datetime.strftime(self.request.requested_at_korean_time, "%H%M%S")
+        extension = filename.split('.')[-1]
+        name = "{date}/{title}_{date}_{time}.{extension}".format(
+            date=date,
+            title=self.request.title,
+            time=time,
+            extension=extension
+        )
+
+        return media_path("mask_image", name)
+
     request = models.ForeignKey(Request, models.CASCADE)
+    wordCloud = models.FileField(upload_to=word_cloud_path, blank=True)
