@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'wcg.apps.WcgConfig',
     'colorfield',
+    'rest_framework',
+
 ]
 
 MIDDLEWARE = [
