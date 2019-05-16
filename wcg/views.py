@@ -41,3 +41,9 @@ def get_orders(request):
     orders = Order.objects.all().values('client', 'title', 'font', 'mask_image')
     orders_list = list(orders)
     return JsonResponse(orders_list, safe=False)
+
+
+def get_order_detail(request, pk):
+    order = Order.objects.filter(pk=pk).all().values('client', 'title', 'font', 'mask_image', 'ordered_at')
+    order = list(order)[0]
+    return JsonResponse(order, safe=False)
