@@ -5,6 +5,7 @@ from pytz import timezone
 from django.forms.widgets import TextInput
 from django.db import models
 from django.conf import settings
+from django.utils import timezone as django_timezone
 
 
 def default_mask_image_path():
@@ -54,6 +55,8 @@ class Order(models.Model):
 
     @property
     def ordered_at_korean_time(self):
+        print(self.title)
+        print(self.ordered_at)
         korean_timezone = timezone(settings.TIME_ZONE)
         return self.ordered_at.astimezone(korean_timezone)
 
@@ -83,12 +86,12 @@ class Order(models.Model):
     font = models.ForeignKey(Font, models.SET_DEFAULT, default=None)
     mask_image = models.ImageField(upload_to=mask_image_path, blank=True)
     background_color = models.CharField(default="#FFFFFF", max_length=100)
-    ordered_at = models.DateTimeField(auto_now_add=True)
+    ordered_at = models.DateTimeField(default=django_timezone.now)
 
 
 class WordCloud(models.Model):
     def __str__(self):
-        return self.order.title + "_" + str(datetime.strftime(self.order.ordered_at_korean_time, "%y%m%d_%H%M%S"))
+        return self.order.title + "_"
 
     def word_cloud_path(self, filename):
         date = datetime.strftime(self.order.ordered_at_korean_time, "%y%m%d")
