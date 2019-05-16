@@ -17,10 +17,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework import routers
+
+from wcg import views as wcg_views
+
+router = routers.DefaultRouter()
+router.register(r'requests', wcg_views.RequestViewSet)
+# router.register(r'wordClouds', wcg_views.)
 
 urlpatterns = [
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('wcg/', include('wcg.urls'))
 
 ]
 
