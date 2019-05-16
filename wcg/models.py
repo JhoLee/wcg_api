@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pytz import timezone
 
-from colorfield.fields import ColorField
+from django.forms.widgets import TextInput
 from django.db import models
 from django.conf import settings
 
@@ -82,16 +82,16 @@ class Order(models.Model):
     data = models.TextField(default="")
     font = models.ForeignKey(Font, models.SET_DEFAULT, default=None)
     mask_image = models.ImageField(upload_to=mask_image_path, blank=True)
-    background_color = ColorField(default="#FFFFFF")
+    background_color = models.CharField(default="#FFFFFF", max_length=100)
     ordered_at = models.DateTimeField(auto_now_add=True)
 
 
 class WordCloud(models.Model):
     def __str__(self):
-        return self.order.title + "_" + str(datetime.strftime(self.order.oredered_at_korean_time, "%y%m%d_%H%M%S"))
+        return self.order.title + "_" + str(datetime.strftime(self.order.ordered_at_korean_time, "%y%m%d_%H%M%S"))
 
     def word_cloud_path(self, filename):
-        date = datetime.strftime(self.order.oredered_at_korean_time, "%y%m%d")
+        date = datetime.strftime(self.order.ordered_at_korean_time, "%y%m%d")
         time = datetime.strftime(self.order.ordered_at_korean_time, "%H%M%S")
         extension = filename.split('.')[-1]
 
