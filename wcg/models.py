@@ -72,7 +72,7 @@ class Order(models.Model):
         time = datetime.strftime(self.ordered_at_korean_time, "%H%M%S")
         extension = filename.split('.')[-1]
 
-        name = "{date}/{title}_{date}_{time}.{extension}".format(
+        name = "{date}/{title}-{date}_{time}.{extension}".format(
             date=date,
             title=self.title,
             time=time,
